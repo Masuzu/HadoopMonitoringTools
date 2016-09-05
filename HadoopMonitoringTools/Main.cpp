@@ -8,6 +8,9 @@
 
 using namespace Hadoop::Tools;
 
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+
 template<typename A, typename B>
 std::pair<B, A> FlipPair(const std::pair<A, B> &p)
 {
@@ -27,11 +30,16 @@ int main()
 	ServerAPI *server_API = new HistoryServerAPI("http://jobhistory.pa4.hpc.criteo.prod/");
 	// ServerAPI *server_API = new ResourceManagerAPI("http://resourcemanager.pa4.hpc.criteo.prod");
 	auto apps = server_API->GetAllApps({ "user=recocomputer" });
+
+	int64_t min_timestamp = INT64_MAX;
+	int64_t max_timestamp = INT64_MIN;
 	std::multimap<std::string, int64_t> runtime_per_job;
 	for (const ClusterApplication *application : apps)
 	{
 		Job *job = (Job*)application;
 		runtime_per_job.insert(std::make_pair(job->name(), job->average_map_time() * job->maps_total() + job->average_reduce_time() * job->reduces_total()));
+		min_timestamp = min(min_timestamp, job->start_time());
+		max_timestamp = max(max_timestamp, job->finish_time());
 	}
 	std::map<std::string, int64_t> aggregated_runtime_per_job;
 	int64_t total_runtime_for_user = 0;
@@ -64,6 +72,8 @@ int main()
 		auto value_bounds = user_jobs_sorted_by_runtime.equal_range(runtime);
 		std::cout << entry.second << " " << ((double)runtime / total_runtime_for_user * 100) << "%" << std::endl;
 	}
+
+	std::cout << "Over " << (max_timestamp - min_timestamp) / (1000 * 60) << " minutes";
 
 	delete server_API;
 }

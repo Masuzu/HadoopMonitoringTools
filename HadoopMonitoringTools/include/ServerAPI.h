@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Query.h"
+#include "Utils/Query.h"
 #include "ClusterApplication.h"
+
 #include <vector>
 #include <initializer_list>
 

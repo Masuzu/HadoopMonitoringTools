@@ -8,7 +8,8 @@ std::vector<std::string> &Split(const std::string &s, const std::string &delimit
 	size_t pos_end = 0;
 	size_t delimiter_length = delimiter.length();
 	std::string token;
-	while ((pos_end = s.find(delimiter, pos_begin)) != std::string::npos) {
+	while ((pos_end = s.find(delimiter, pos_begin)) != std::string::npos)
+	{
 		if(pos_begin != pos_end)
 		{
 			token = s.substr(pos_begin, pos_end - pos_begin);

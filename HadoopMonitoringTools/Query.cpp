@@ -55,47 +55,69 @@ namespace Hadoop
 
 #pragma endregion Callbacks
 
-		Query::Query()
-		{
-			curl_ = curl_easy_init();
-		}
-
-		Query::~Query()
-		{
-			if(curl_)
-			{
-				curl_easy_cleanup(curl_);
-			}
-		}
-
 		void Query::ExecuteWithNegotiate(const char *url, CurlOutput *output, CurlOutput *header)
 		{
-			if(curl_)
+			CURL *curl = curl_easy_init();
+			if(curl)
 			{
-				curl_easy_setopt(curl_, CURLOPT_USERNAME, "");	// Enable any user
-				curl_easy_setopt(curl_, CURLOPT_URL, url);  
-				curl_easy_setopt(curl_, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
+				curl_easy_setopt(curl, CURLOPT_USERNAME, "");	// Enable any user
+				curl_easy_setopt(curl, CURLOPT_URL, url);  
+				curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
 
 				if(output)
 				{
-					curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &OutputCallback);
-					curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)output);
+					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &OutputCallback);
+					curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)output);
 				}
 				else
 				{
-					curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, &NoopCallback);
+					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &NoopCallback);
 				}
 				if(header)
 				{
-					curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, &OutputCallback);
-					curl_easy_setopt(curl_, CURLOPT_HEADERDATA, (void*)header);
+					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &OutputCallback);
+					curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)header);
 				}
 				else
 				{
-					curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, &NoopCallback);
+					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &NoopCallback);
 				}
 
-				curl_easy_perform(curl_);
+				curl_easy_perform(curl);
+				curl_easy_cleanup(curl);
+			}
+		}
+
+		void Query::ExecuteWithNegotiate2(const char *url, CurlOutput *output, CurlOutput *header)
+		{
+			CURL *curl = curl_easy_init();
+			if (curl)
+			{
+				curl_easy_setopt(curl, CURLOPT_USERNAME, "");	// Enable any user
+				curl_easy_setopt(curl, CURLOPT_URL, url);
+				curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
+
+				if (output)
+				{
+					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &OutputCallback);
+					curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)output);
+				}
+				else
+				{
+					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &NoopCallback);
+				}
+				if (header)
+				{
+					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &OutputCallback);
+					curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)header);
+				}
+				else
+				{
+					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &NoopCallback);
+				}
+
+				curl_easy_perform(curl);
+				curl_easy_cleanup(curl);
 			}
 		}
 

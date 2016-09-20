@@ -34,5 +34,12 @@ namespace Hadoop
 
 			return result;
 		}
+
+		void ResourceManagerAPI::KillApp(const std::string &app_id)
+		{
+			char* body = "{ \"state\" : \"KILLED\" }";
+			std::string response = PutRequest("ws/v1/cluster/apps/" + app_id + "/state", body, {});
+			int i = 0;
+		}
 	}
 }

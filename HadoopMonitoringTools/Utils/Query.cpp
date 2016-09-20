@@ -55,7 +55,32 @@ namespace Hadoop
 
 #pragma endregion Callbacks
 
-		void Query::ExecuteWithNegotiate(const char *url, CurlOutput *output, CurlOutput *header)
+		static void BindOutputAndHeaderAndExecute(CURL *curl, CurlOutput *output, CurlOutput *header)
+		{
+			if (output)
+			{
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &OutputCallback);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)output);
+			}
+			else
+			{
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &NoopCallback);
+			}
+			if (header)
+			{
+				curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &OutputCallback);
+				curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)header);
+			}
+			else
+			{
+				curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &NoopCallback);
+			}
+
+			curl_easy_perform(curl);
+			curl_easy_cleanup(curl);
+		}
+
+		void Query::ExecutePutWithNegotiate(const char *url, const std::string &body, CurlOutput *output, CurlOutput *header)
 		{
 			CURL *curl = curl_easy_init();
 			if(curl)
@@ -63,28 +88,14 @@ namespace Hadoop
 				curl_easy_setopt(curl, CURLOPT_USERNAME, "");	// Enable any user
 				curl_easy_setopt(curl, CURLOPT_URL, url);  
 				curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
+				curl_easy_setopt(curl, CURLOPT_PUT);
 
-				if(output)
-				{
-					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &OutputCallback);
-					curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)output);
-				}
-				else
-				{
-					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &NoopCallback);
-				}
-				if(header)
-				{
-					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &OutputCallback);
-					curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)header);
-				}
-				else
-				{
-					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &NoopCallback);
-				}
+				curl_slist *http_header = nullptr;
+				http_header = curl_slist_append(http_header, "Content-Type: application/json");
+				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, http_header);
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
 
-				curl_easy_perform(curl);
-				curl_easy_cleanup(curl);
+				BindOutputAndHeaderAndExecute(curl, output, header);
 			}
 		}
 
@@ -97,27 +108,7 @@ namespace Hadoop
 				curl_easy_setopt(curl, CURLOPT_URL, url);
 				curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
 
-				if (output)
-				{
-					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &OutputCallback);
-					curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)output);
-				}
-				else
-				{
-					curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &NoopCallback);
-				}
-				if (header)
-				{
-					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &OutputCallback);
-					curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)header);
-				}
-				else
-				{
-					curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &NoopCallback);
-				}
-
-				curl_easy_perform(curl);
-				curl_easy_cleanup(curl);
+				BindOutputAndHeaderAndExecute(curl, output, header);
 			}
 		}
 
@@ -128,7 +119,7 @@ namespace Hadoop
 			for(size_t attempt = 0; attempt < max_retries; ++attempt)
 			{
 				struct CurlOutput header;
-				ExecuteWithNegotiate(location.c_str(), nullptr, &header);
+				ExecuteWithNegotiate2(location.c_str(), nullptr, &header);
 				location = header.GetHeaderValue("Location");
 				if(!location.empty() && location != final_url)
 					final_url = location;

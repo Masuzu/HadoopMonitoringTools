@@ -8,7 +8,7 @@ namespace Hadoop
 		static const char *kApiName = "name";
 		static const char *kApiUser = "user";
 		static const char *kApiState = "state";
-		static const char *kApiStartTime = "startTime";
+		static const char *kApiStartTime = "startedTime";
 		static const char *kApiQueue = "queue";
 		static const char *kApiMemorySeconds = "memorySeconds";
 

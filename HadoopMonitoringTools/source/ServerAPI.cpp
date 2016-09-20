@@ -37,5 +37,21 @@ namespace Hadoop
 			query_->ExecuteWithNegotiate2(url.c_str(), &output);
 			return output.data;
 		}
+
+		std::string ServerAPI::PutRequest(const std::string &request, const std::string &body, const std::initializer_list<const char *> &query_parameters)
+		{
+			CurlOutput output;
+
+			std::string additional_parameters = "?";
+			for (auto &query_parameter : query_parameters)
+			{
+				additional_parameters += query_parameter;
+				additional_parameters += "&";
+			}
+
+			std::string url = server_url_ + "/" + request + additional_parameters;
+			query_->ExecutePutWithNegotiate(url.c_str(), body, &output);
+			return output.data;
+		}
 	}
 }

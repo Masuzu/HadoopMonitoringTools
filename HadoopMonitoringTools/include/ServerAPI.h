@@ -29,6 +29,7 @@ namespace Hadoop
 				return Request(request, {});
 			}
 			std::string Request(const std::string &request, const std::initializer_list<const char *> &query_parameters);
+			std::string PutRequest(const std::string &request, const std::string &body, const std::initializer_list<const char *> &query_parameters);
 		};
 	}
 }

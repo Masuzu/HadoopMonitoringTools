@@ -22,7 +22,7 @@ namespace Hadoop
 			Query() {}
 			virtual ~Query() {}
 
-			void ExecuteWithNegotiate(const char *url, CurlOutput *output = nullptr, CurlOutput *header = nullptr);
+			void ExecutePutWithNegotiate(const char *url, const std::string &body, CurlOutput *output = nullptr, CurlOutput *header = nullptr);
 			void ExecuteWithNegotiate2(const char *url, CurlOutput *output = nullptr, CurlOutput *header = nullptr);
 
 			// Return the final URL starting from 'url' and following up to 'max_retries' redirections

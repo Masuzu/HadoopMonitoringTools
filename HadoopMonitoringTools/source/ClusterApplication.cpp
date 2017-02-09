@@ -8,7 +8,8 @@ namespace Hadoop
 		static const char *kApiName = "name";
 		static const char *kApiUser = "user";
 		static const char *kApiState = "state";
-		static const char *kApiStartTime = "startedTime";
+		static const char *kApiStartedTime = "startedTime";
+		static const char *kApiStartTime = "startTime";
 		static const char *kApiQueue = "queue";
 		static const char *kApiMemorySeconds = "memorySeconds";
 
@@ -44,7 +45,10 @@ namespace Hadoop
 			user_ = resource_manager_json_response.get(kApiUser, "").asString();
 			state_ = ParseState(resource_manager_json_response.get(kApiState, "").asCString());
 			queue_ = resource_manager_json_response.get(kApiQueue, "").asString();
-			start_time_ = resource_manager_json_response.get(kApiStartTime, "0").asInt64();
+			if (resource_manager_json_response.isMember(kApiStartedTime))
+				start_time_ = resource_manager_json_response[kApiStartedTime].asInt64();
+			else
+				start_time_ = resource_manager_json_response[kApiStartTime].asInt64();
 		}
 	}
 }

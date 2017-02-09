@@ -8,11 +8,12 @@ using namespace Hadoop::Tools;
 
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
+#define _JOB_HISTORY_STATS
 
 int main()
 {
-	//ServerAPI *server_API = new HistoryServerAPI("http://jobhistory.pa4.hpc.criteo.prod/");
-	ServerAPI *server_API = new ResourceManagerAPI("http://resourcemanager.pa4.hpc.criteo.preprod");
+	ServerAPI *server_API = new HistoryServerAPI("http://jobhistory.pa4.hpc.criteo.prod/");
+	//ServerAPI *server_API = new ResourceManagerAPI("http://resourcemanager.pa4.hpc.criteo.prod");
 	auto apps = server_API->GetAllApps({ "user=recocomputer" });
 
 	int64_t min_timestamp = INT64_MAX;
@@ -21,11 +22,12 @@ int main()
 	std::multimap<std::string, int64_t> runtime_per_job;
 	int64_t total_run_time;
 
+#if 0
 	std::vector<ClusterApplication*> applications_to_kill;
 	for (const ClusterApplication *application : apps)
 	{
 		Application *job = (Application*)application;
-		if (job->name().find("ussrPV") == 0)
+		if (job->name().find("ussrPVWithCoEventsB") != -1)
 			applications_to_kill.push_back(job);
 	}
 
@@ -34,10 +36,11 @@ int main()
 	{
 		kill_command += "mapred job -kill job_" + application->id().substr(application->id().find_first_of('_') + 1);
 		kill_command += "\n";
-		// ((ResourceManagerAPI *)server_API)->KillApp(application->id());
+		//((ResourceManagerAPI *)server_API)->KillApp(application->id());
 	}
 	std::cout << kill_command << std::endl;
-	int i = 0;
+#endif
+
 #ifdef _JOB_HISTORY_STATS
 	for (const ClusterApplication *application : apps)
 	{
